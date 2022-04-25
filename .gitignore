@@ -1,8 +1,10 @@
-# Compiled source #
-
+NomeRG100M.txt
+NomeRG1M.txt
+*NomeRG100M.txt
+*NomeRG1M.txt
 *.txt
-
-
+.txt
+# Compiled source #
 ###################
 *.com
 *.class
