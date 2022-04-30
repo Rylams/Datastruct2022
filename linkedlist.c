@@ -8,18 +8,19 @@
 struct node
 {
     char name[11];
-    char rg[8];
+    int rg;
     struct node *next;
 };
 
 struct list
 {
     Node *head;
+    Node *tail;
 };
 
-Node *createnode(char *name, char *rg);
+Node *createnode(char *name, int rg);
 
-Node *createnode(char *name, char *rg)
+Node *createnode(char *name, int rg)
 {
     Node *newNode = (Node *)malloc(sizeof(Node));
     if (!newNode)
@@ -27,7 +28,7 @@ Node *createnode(char *name, char *rg)
         return NULL;
     }
     strcpy(newNode->name, name);
-    strcpy(newNode->rg, rg);
+    newNode->rg = rg;
     newNode->next = NULL;
     return newNode;
 }
@@ -53,89 +54,114 @@ void print_list(List *list)
 
     for (; current->next != NULL; current = current->next)
     {
-        printf("%s\n %s\n", current->name, current->rg);
+        printf("%s\n %d\n", current->name, current->rg);
     }
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC;
     printf("lista encadeada %f secs para executar \n", time_taken);
 }
 
-void push(List *list, char *name, char *rg)
+void push(List *list, char *name, int rg)
 {
-    clock_t t;
-    t = clock();
     Node *current = NULL;
     if (list->head == NULL)
     {
         list->head = createnode(name, rg);
+        list->tail = list->head;
     }
     else
     {
-        current = list->head;
-        while (current->next != NULL)
-        {
-            current = current->next;
-        }
+        current = list->tail;
         current->next = createnode(name, rg);
+        current = current->next;
+        list->tail = current;
     }
-    double time_taken = ((double)t) / CLOCKS_PER_SEC;
 }
-/*----------------------------------------------------------------*/
+/*----------------------------------b------------------------------*/
 
-void pushfirstnode(List *list, char *name, char *rg)
+void pushfirstnode(List *list, char *name, int rg)
 {
-    clock_t t;
-    t = clock();
-    Node *current = NULL;
-    if (list->head == NULL)
-    {
-        list->head = createnode(name, rg);
-    }
-    else
-    {
-        current = createnode(name, rg);
-        current->next = list->head;
-        list->head = current;
-    }
-    double time_taken = ((double)t) / CLOCKS_PER_SEC;
-    printf("lista encadeada %f secs para executar \n", time_taken);
-}
-
-/*----------------------------------------------------------------*/
-
-void pushatn(List *list, char *name, char *rg, int n)
-{
+    int c = 0;
+    int m = 0;
     clock_t t;
     t = clock();
     Node *current = NULL;
     Node *last = NULL;
+
+    c++;
     if (list->head == NULL)
     {
         list->head = createnode(name, rg);
     }
     else
     {
+        last = createnode(name, rg);
         current = list->head;
-        for (int i = 0; i < n - 1; i++)
-        {
-            current = current->next;
-        }
-        last = current;
-        current = current->next;
-        last->next = createnode(name, rg);
-        last = last->next;
         last->next = current;
+        list->head = last;
+        m += 4;
     }
     double time_taken = ((double)t) / CLOCKS_PER_SEC;
     printf("lista encadeada %f secs para executar \n", time_taken);
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
+}
+
+/*----------------------------------------------------------------*/
+
+void pushatn(List *list, char *name, int rg, int n)
+{
+    clock_t t;
+    t = clock();
+    int c = 0;
+    int m = 0;
+
+    Node *current = NULL;
+    Node *last = NULL;
+
+    c++;
+    if (list->head == NULL)
+    {
+        list->head = createnode(name, rg);
+        m++;
+    }
+    else
+    {
+        current = list->head;
+        m++;
+        for (int i = 0; i < n - 1; i++)
+        {
+            current = current->next;
+            m++;
+        }
+        last = current;
+        last->next = createnode(name, rg);
+        last = last->next;
+        m+=3;
+        c++;
+        if (last->next != NULL)
+        {
+            last->next = current;
+            m++;
+        }
+    }
+    double time_taken = ((double)t) / CLOCKS_PER_SEC;
+    printf("lista encadeada %f secs para executar \n", time_taken);
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
 }
 
 void removefirst(List *list)
 {
     clock_t t;
     t = clock();
+    int c = 0;
+    int m = 0;
     Node *current = NULL;
     Node *last = NULL;
+
+    c++;
+
     if (list->head == NULL)
     {
         return;
@@ -146,8 +172,12 @@ void removefirst(List *list)
         current = last->next;
         list->head = current;
         last = NULL;
+        m+= 4;
     }
     double time_taken = ((double)t) / CLOCKS_PER_SEC;
+    printf("lista encadeada %f secs para executar \n", time_taken);
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
 }
 
 void removelast(List *list, int n)
@@ -155,6 +185,10 @@ void removelast(List *list, int n)
     clock_t t;
     t = clock();
     Node *current = NULL;
+    int c = 0;
+    int m = 0;
+
+    c++;
     if (list->head == NULL)
     {
         return;
@@ -162,14 +196,19 @@ void removelast(List *list, int n)
     else
     {
         current = list->head;
-        for (int i = 0; i < n - 1; i++)
-        {
+        m++;
+        while (current->next != list->tail){
             current = current->next;
+            m++;
         }
         current->next = NULL;
+        m++;
     }
     double time_taken = ((double)t) / CLOCKS_PER_SEC;
+
     printf("lista encadeada %f secs para executar \n", time_taken);
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
 }
 
 void removeatn(List *list, int n)
@@ -178,29 +217,41 @@ void removeatn(List *list, int n)
     t = clock();
     Node *current = NULL;
     Node *last = NULL;
+    int c = 0;
+    int m = 0;
+
+    c++;
     if (list->head == NULL)
     {
         return;
     }
     else
     {
+        m++;
         current = list->head;
         for (int i = 0; i < n - 1; i++)
         {
             current = current->next;
+            m++;
         }
         last = current;
         current = current->next;
         last->next = current->next;
+        m += 3;
     }
     double time_taken = ((double)t) / CLOCKS_PER_SEC;
     printf("lista encadeada %f secs para executar \n", time_taken);
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
 }
 
-void searchrg(List *list, char *rg)
+void searchrg(List *list, int rg)
 {
     Node *current = NULL;
+    int c = 0;
+    int m = 0;
     int z = 0;
+    c++;
     if (list->head == NULL)
     {
         return;
@@ -208,15 +259,19 @@ void searchrg(List *list, char *rg)
     else
     {
         current = list->head;
-        while (strcmp(current->rg, rg) != -7)
+        m++;
+        while (current->rg != rg)
         {
             current = current->next;
             z++;
+            m++;
         }
         printf("Nome: %s\n", current->name);
-        printf("RG: %s\n", current->rg);
+        printf("RG: %d\n", current->rg);
         printf("Posição %d\n", z);
     }
+    printf("lista encadeada C(n) = %d\n", c);
+    printf("lista encadeada M(n)= %d\n", m);
 }
 
 void closelist(List *list)
