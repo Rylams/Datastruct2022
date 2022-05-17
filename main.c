@@ -113,6 +113,112 @@ Pessoa procurarlista(Pessoa *listasequencial, int rows, int rginput)
 
     return *listasequencial;
 }
+
+void swap(Pessoa *listasequencial, int i, int j, int m)
+{
+    Pessoa temp = listasequencial[i];
+    listasequencial[i] = listasequencial[j];
+    listasequencial[j] = temp;
+    m += 3;
+}
+
+int partition(Pessoa *listasequencial, int low, int high, int c, int m)
+{
+    Pessoa pivot = listasequencial[high];
+
+    int i = (low - 1);
+    m += 2;
+
+    for (int j = low; j <= high; j++)
+    {
+        c++;
+        if (listasequencial[j].rg < pivot.rg)
+        {
+            i++;
+            swap(listasequencial, i, j, m);
+        }
+    }
+    swap(listasequencial, i + 1, high, m);
+    return (i + 1);
+}
+
+void quicksort(Pessoa *listasequencial, int low, int high, int c, int m)
+{
+    c++;
+    if (low < high)
+    {
+        int pi = partition(listasequencial, low, high, c, m);
+        m++;
+
+        quicksort(listasequencial, low, pi - 1, c, m);
+        quicksort(listasequencial, pi + 1, high, c, m);
+    }
+}
+
+void merge(Pessoa *listasequencial, int l, int ma, int r)
+{
+    int i, j, k;
+    int n1 = ma - l + 1;
+    int n2 = r - ma;
+
+    Pessoa L[n1], R[n2];
+
+    for (i = 0; i < n1; i++)
+    {
+        L[i] = listasequencial[l + i];
+    }
+    for (j = 0; j < n2; j++)
+    {
+        R[j] = listasequencial[ma + 1 + j];
+    }
+
+    i = 0;
+    j = 0;
+    k = l;
+
+    while (i < n1 && j < n2)
+    {
+        if (L[i].rg <= R[j].rg)
+        {
+            listasequencial[k] = L[i];
+            i++;
+        }
+        else
+        {
+            listasequencial[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1)
+    {
+        listasequencial[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2)
+    {
+        listasequencial[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort(Pessoa *listasequencial, int l, int r)
+{
+    if (l < r)
+    {
+        int m = l + (r - l) / 2;
+
+        mergeSort(listasequencial, l, m);
+        mergeSort(listasequencial, m + 1, r);
+
+        merge(listasequencial, l, m, r);
+    }
+}
+
 void main(void)
 {
     char line[40];
@@ -193,7 +299,6 @@ void main(void)
     printf("%d rows\n", rows);
 
     /* read the file line by line */
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     Pessoa *listasequencial = (Pessoa *)malloc(2 * rows * sizeof(Pessoa));
 
@@ -203,7 +308,7 @@ void main(void)
     int c2 = 0;
     int m2 = 0;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////// COMPOE LISTAS  //////////////////////////////////////////////////////////////////
 
     while (fgets(line, sizeof(line), fp))
     {
@@ -234,7 +339,7 @@ void main(void)
     printf("lista encadeada C(n) = %d\n", c2);
     printf("lista encadeada M(n)= %d\n", m2);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////   MENU   //////////////////////////////////////////////////////////////////
 
     while (menu != 0)
     {
@@ -248,6 +353,7 @@ void main(void)
         printf("Digite 7 para Procurar um nó com o campo RG.\n");
         printf("Digite 8 para salvar em um arquivo\n");
         printf("Digite 9 para printar a lista em seu estado atual.\n");
+        printf("Digite 10 para selecionar um algoritmo de ordenação\n");
         printf("Digite 0 para sair\n");
         printf("############################################################################\n");
         scanf("%d", &menu);
@@ -379,20 +485,63 @@ void main(void)
         else if (menu == 7)
         // 777777777777777777777777777
         {
-            int rginput = 0;
+            int searchid = 0;
+            printf("Digite 1 para busca sequencial\n");
+            printf("Digite 2 para busca binária(Necessário ter ordernado a lista)\n");
+            scanf("%d", &searchid);
 
-            printf("Digite o RG: \n");
-            scanf("%d", &rginput);
+            if (searchid == 1)
+            {
+                int rginput = 0;
 
-            clock_t t;
-            t = clock();
+                printf("Digite o RG: \n");
+                scanf("%d", &rginput);
 
-            searchrg(linkedlist, rginput);
+                clock_t t;
+                t = clock();
 
-            *listasequencial = procurarlista(listasequencial, rows, rginput);
+                searchrg(linkedlist, rginput);
 
-            double time_taken = ((double)t) / CLOCKS_PER_SEC;
-            printf("lista levou %f sec \n", time_taken);
+                *listasequencial = procurarlista(listasequencial, rows, rginput);
+
+                double time_taken = ((double)t) / CLOCKS_PER_SEC;
+                printf("lista levou %f sec \n", time_taken);
+            }
+            else if (searchid == 2)
+            {
+
+                int rginput = 0;
+                Pessoa found;
+
+                printf("Digite o RG: \n");
+                scanf("%d", &rginput);
+
+                int l = 0;
+                int r = rows - 1;
+                int pos = 0;
+
+                while (l <= r)
+                {
+                    int m = l + (r - l) / 2;
+
+                    if (listasequencial[m].rg == rginput)
+                    {
+                        found = listasequencial[m];
+                        pos = m;
+                    }
+
+                    if (listasequencial[m].rg < rginput)
+                    {
+                        l = m + 1;
+                    }
+                    else
+                    {
+                        r = m - 1;
+                    }
+                }
+
+                printf("Nome: %s\n RG: %d\n Posição: %d\n", found.name, found.rg, pos + 1);
+            }
         }
         else if (menu == 8)
         {
@@ -416,6 +565,140 @@ void main(void)
         else if (menu == 9)
         {
             printlista(listasequencial, rows);
+        }
+        else if (menu == 10)
+        {
+            int sort = 0;
+
+            printf("Digite 1 para ordenar por Selection Sort\n");
+            printf("Digite 2 para ordenar por Insertion Sort\n");
+            printf("Digite 3 para ordenar por Bubble-Sort\n");
+            printf("Digite 4 para ordenar por Shell-Sort\n");
+            printf("Digite 5 para ordenar por Quick-Sort\n");
+            printf("Digite 6 para ordenar por Merge Sort\n");
+
+            scanf("%d", &sort);
+
+            if (sort == 1)
+            {
+                int j, min = 0;
+                int c = 0;
+                int m = 0;
+
+                int n = rows;
+                printf("%d\n", n);
+
+                for (int i = 0; i < n - 1; i++)
+                {
+                    min = i;
+                    m++;
+                    for (j = i + 1; j < n; j++)
+                    {
+                        c++;
+                        if (listasequencial[j].rg < listasequencial[min].rg)
+                        {
+                            min = j;
+                            m++;
+                        }
+                    }
+                    Pessoa temp = listasequencial[min];
+                    listasequencial[min] = listasequencial[i];
+                    listasequencial[i] = temp;
+                    m += 3;
+                }
+
+                printf("C(n) = %d, M(n) = %d\n", c, n);
+            }
+            else if (sort == 2)
+            {
+                Pessoa key;
+                int j;
+                int n = rows;
+                int c = 0, m = 0;
+
+                for (int i = 1; i < n; i++)
+                {
+                    key = listasequencial[i];
+                    j = i - 1;
+                    m = m + 2;
+
+                    while (j >= 0 && listasequencial[j].rg > key.rg)
+                    {
+                        listasequencial[j + 1] = listasequencial[j];
+                        j = j - 1;
+                        m = m + 2;
+                        c++;
+                    }
+                    listasequencial[j + 1] = key;
+                    m++;
+                }
+
+                printf("C(n) = %d, M(n) = %d\n", c, n);
+            }
+            else if (sort == 3)
+            {
+                int i, j;
+                int c = 0, m = 0;
+
+                for (i = 0; i < rows - 1; i++)
+                {
+                    for (j = 0; j < rows - i - 1; j++)
+                    {
+                        c++;
+                        if (listasequencial[j].rg > listasequencial[j + 1].rg)
+                        {
+                            Pessoa temp = listasequencial[j];
+                            listasequencial[j] = listasequencial[j + 1];
+                            listasequencial[j + 1] = temp;
+                            m += 3;
+                        }
+                    }
+                }
+
+                printf("C(n) = %d, M(n) = %d\n", c, m);
+            }
+            else if (sort == 4)
+            {
+                int c = 0, m = 0;
+                for (int gap = rows / 2; gap > 0; gap /= 2)
+                {
+                    for (int i = gap; i < rows; i += 1)
+                    {
+                        Pessoa temp = listasequencial[i];
+                        m++;
+                        int j;
+                        for (j = i; j >= gap && listasequencial[j - gap].rg > temp.rg; j -= gap)
+                        {
+                            listasequencial[j] = listasequencial[j - gap];
+                            m++;
+                        }
+                        listasequencial[j] = temp;
+                        m++;
+                    }
+                }
+                printf("C(n) = %d, M(n) = %d\n", c, m);
+            }
+            else if (sort == 5)
+            {
+                int low = 0;
+                int high = rows - 1;
+                int c = 0;
+                int m = 0;
+
+                quicksort(listasequencial, low, high, c, m);
+                m = rows * 6;
+                c = rows * 3;
+                printf("C(n) = %d, M(n) = %d\n", c, m);
+            }
+            else if (sort == 6)
+            {
+                int c = 0;
+                int m = 0;
+
+                mergeSort(listasequencial, 0, rows - 1);
+
+                printf("C(n) = %d, M(n) = %d\n", c, m);
+            }
         }
     }
     closelist(linkedlist);
